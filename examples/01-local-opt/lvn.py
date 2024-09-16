@@ -13,16 +13,23 @@ def reverse_lookup(dict, value):
 def lvn(block):
     # key: dst, value: op, args
     lvn_blob_map = OrderedDict()
+    # first pass: collect all the args, populate lvn dictionary
+    # mark common subexprs as ids
     for insn in block.instrs:
         args = []
         if "args" in insn:
             # collect all args
-            for arg in insn["args"]:
+            for i,arg in enumerate(insn["args"]):
                 if arg in lvn_blob_map.keys():
-                    args.append(arg)
+                    if lvn_blob_map[arg][0] == "id":
+                        match = lvn_blob_map[arg][1]
+                        log_file.write(f"Found an arg id: {arg} -> {match}\n")
+                        args.append(match[0])
+                        insn["args"][i] = match[0]
+                    else:
+                        args.append(arg)
                 else:
                     lvn_blob_map[arg] = ("uninferable", None) 
-
                     args.append(arg)
         # look up this common subexpr
         if "dest" in insn:
@@ -33,11 +40,16 @@ def lvn(block):
                 # reverse lookup
                 key = reverse_lookup(lvn_blob_map, subexpr)
                 log_file.write(f"Found a match: {subexpr}\n")
+                lvn_blob_map[insn["dest"]] = ("id", [key])
                 insn.update({
                     "op": "id",
                     "args": [key]
                 })
-                lvn_blob_map[insn["dest"]] = ("id", [key])
+    # second pass: remove ids
+    for insn in block.instrs:
+        if "op" in insn and insn["op"] == "id":
+            block.instrs.remove(insn)
+            log_file.write(f"Removed {insn}\n")
 
 if __name__ == "__main__":
     log_file = open("log/lvn.log", "w")
