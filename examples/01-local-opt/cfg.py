@@ -6,26 +6,26 @@ from collections import OrderedDict
 
 CF_OPs = ["br", "jmp"]
 
-class basic_block:
+class BasicBlock:
     def __init__(self, label: str = None):
         self.instrs : list[dict] = []
         self.label : str = label
     
     def __str__(self):
-        return f"basic_block(label={self.label}, instrs={self.instrs})"
+        return f"BasicBlock(label={self.label}, instrs={self.instrs})"
 
     def add_instr(self, instr: dict):
         self.instrs.append(instr)    
 
 def construct_cfg(instrs):
     cfg = nx.DiGraph()
-    curr_block = basic_block("entry")
+    curr_block = BasicBlock("entry")
     cfg.add_node(curr_block)
     blocks = OrderedDict({"entry": curr_block}) # dummy label marking the entry node
     # the node pass
     for instr in instrs:
         if "label" in instr:
-            curr_block = basic_block(instr["label"])
+            curr_block = BasicBlock(instr["label"])
             cfg.add_node(curr_block)
             blocks[instr["label"]] = curr_block
         curr_block.add_instr(instr)
