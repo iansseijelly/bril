@@ -34,13 +34,14 @@ def lvn(block):
         # look up this common subexpr
         if "dest" in insn:
             subexpr = (insn["op"], args)
+            log_file.write(f"Subexpr: {subexpr}\n")
             if insn["op"] == "const" or subexpr not in lvn_blob_map.values():
                 lvn_blob_map[insn["dest"]] = subexpr
             else:
                 # reverse lookup
                 key = reverse_lookup(lvn_blob_map, subexpr)
                 log_file.write(f"Found a match: {subexpr}\n")
-                lvn_blob_map[insn["dest"]] = ("id", key)
+                lvn_blob_map[insn["dest"]] = ("id", [key])
                 insn.update({
                     "op": "id",
                     "args": [key]
