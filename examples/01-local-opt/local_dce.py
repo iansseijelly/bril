@@ -30,5 +30,4 @@ if __name__ == "__main__":
         for block in local_cfg.nodes:
             local_dce(block)
         fn["instrs"] = cfg.cfg_to_instrs(local_cfg)
-
     json.dump(prog, sys.stdout, indent=2)
