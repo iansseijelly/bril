@@ -15,9 +15,17 @@ def local_dce(block):
             if insn["dest"] in unused:
                 # prune the instruction
                 unused_insn = unused[insn["dest"]]
-                block.instrs.remove(unused_insn)
-                log_file.write(f"Pruned {unused_insn}\n")
+                unused_insn["op"] = "nop"
             unused[insn["dest"]] = insn
+    
+    i = 0
+    while i < len(block.instrs):
+        insn = block.instrs[i]
+        if "op" in insn and insn["op"] == "nop":
+            block.instrs.remove(insn)
+            log_file.write(f"Pruned {insn}\n")
+        else:
+            i += 1
                 
 
 if __name__ == "__main__":
