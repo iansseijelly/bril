@@ -19,23 +19,25 @@ def lvn(block):
         args = []
         if "args" in insn:
             # collect all args
-            for i,arg in enumerate(insn["args"]):
-                if arg in lvn_blob_map.keys():
-                    if lvn_blob_map[arg][0] == "id":
-                        match = lvn_blob_map[arg][1]
-                        log_file.write(f"Found an arg common_subexpr: {arg} -> {match}\n")
-                        args.append(match[0])
-                        insn["args"][i] = match[0]
-                    else:
-                        args.append(arg)
-                else:
-                    lvn_blob_map[arg] = ("uninferable", None) 
-                    args.append(arg)
+            for i, arg in enumerate(insn["args"]):
+                original_arg = arg
+                while arg in lvn_blob_map and lvn_blob_map[arg][0] == "id":
+                    arg = lvn_blob_map[arg][1][0]
+                
+                if arg != original_arg:
+                    log_file.write(f"Found an arg common_subexpr: {original_arg} -> {arg}\n")
+                    insn["args"][i] = arg
+
+                args.append(arg)
+                
+                if arg not in lvn_blob_map:
+                    lvn_blob_map[arg] = ("uninferable", None)
+                    log_file.write(f"found uninferable: {arg}\n")
         # look up this common subexpr
         if "dest" in insn:
             subexpr = (insn["op"], args)
             log_file.write(f"Subexpr: {subexpr}\n")
-            if insn["op"] == "const" or subexpr not in lvn_blob_map.values():
+            if insn["op"] == "const" or insn["op"] == "id" or subexpr not in lvn_blob_map.values():
                 lvn_blob_map[insn["dest"]] = subexpr
             else:
                 # reverse lookup
@@ -46,6 +48,7 @@ def lvn(block):
                     "op": "id",
                     "args": [key]
                 })
+        log_file.write(f"insn: {insn}\n")
 
 if __name__ == "__main__":
     log_file = open("log/lvn.log", "w")

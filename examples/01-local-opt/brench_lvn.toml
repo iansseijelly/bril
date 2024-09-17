@@ -13,5 +13,6 @@ pipeline = [
 pipeline = [
   "bril2json",
   "python3 lvn.py",
+  "python3 global_dce.py",
   "brili -p {args}",
 ]
