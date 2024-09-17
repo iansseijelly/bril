@@ -153,16 +153,16 @@ This is well optimized by our optimizer because:
 Programs that does not work well:
 ```
 @main {
-	x: int = const 4;
-	y: int = const 8;
-	sum1: int = add x y;
-	sum2: int = add x y;
-	br sum1 .L1 .L2;
+  x: int = const 4;
+  y: int = const 8;
+  sum1: int = add x y;
+  sum2: int = add x y;
+  br sum1 .L1 .L2;
 .L1:
-	sum2 = add sum2 sum1
+  sum2 = add sum2 sum1
 .L2:
-	sum3: int = mul sum1 sum2;
-	print sum3;
+  sum3: int = mul sum1 sum2;
+  print sum3;
 }
 ```
 This does not work well because:
