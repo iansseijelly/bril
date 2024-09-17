@@ -169,4 +169,5 @@ This does not work well because:
 1. We have no dataflow analysis
 2. We have no commutative passes
 3. We have no constant folding
+
 Overall, this makes our optimization passes unable to do anything, whereas in reality everything can be folded to printing a constant. 
