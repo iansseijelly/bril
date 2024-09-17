@@ -2,10 +2,12 @@
 
 CS265, Chengyi Lux Zhang
 
+link: https://github.com/iansseijelly/bril/tree/main/examples/01-local-opt 
+
 This directory contains various transformations for local optimizations. 
 
 ## Setting Up
-I installed everything in conda, and the install script does not work 100% for me... 
+(For my own notes) I installed everything in conda, and the install script does not work 100% for me... 
 So run this in every fresh terminal:
 ```
 conda activate bril
