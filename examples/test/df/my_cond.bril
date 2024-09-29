@@ -1,0 +1,19 @@
+@main {
+  a: int = const 47;
+  b: int = const 42;
+  g: int = const 36;
+  cond: bool = const true;
+  br cond .left .right;
+.left:
+  b: int = const 1;
+  c: int = const 10;
+  jmp .end;
+.right:
+  a: int = const 2;
+  c: int = const 10;
+  jmp .end;
+.end:
+  d: int = sub a c;
+  e: int = add g c;
+  print d;
+}
