@@ -32,7 +32,7 @@ def construct_cfg(instrs):
         curr_block.add_instr(instr)
     # the edge pass
     for (i,u) in enumerate(cfg.nodes):
-        if "op" in u.instrs[-1] and u.instrs[-1]["op"] in CF_OPs:
+        if u.instrs and "op" in u.instrs[-1] and u.instrs[-1]["op"] in CF_OPs:
             for label in u.instrs[-1]["labels"]:
                 cfg.add_edge(u, blocks[label])
         # normal fallthrough
