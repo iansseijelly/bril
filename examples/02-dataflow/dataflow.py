@@ -106,6 +106,7 @@ def const_prop_and_fold(cfg, entry_block):
                         "value": calc_folded_value(insn, block_const_map),
                         "type": insn["type"]
                     }
+                    block_const_map[insn["dest"]] = block.instrs[i]["value"]
         if block.label not in const_map or const_map[block.label] != block_const_map:
             const_map[block.label] = block_const_map
             worklist.extend(cfg.successors(block))
