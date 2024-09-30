@@ -1,0 +1,12 @@
+@main {
+  i: int = const 10;
+  x: int = const 1;
+
+.loop:
+  i: int = sub i x;
+  print i;
+  br i .loop .end;
+
+.end:
+  print i;
+}
