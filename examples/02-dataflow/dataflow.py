@@ -110,6 +110,33 @@ def const_prop_and_fold(cfg, entry_block):
             const_map[block.label] = block_const_map
             worklist.extend(cfg.successors(block))
 
+def should_keep(instr):
+    if "op" not in instr:
+        return True
+    return instr["op"] != "nop"
+
+def remove_nops(instrs):
+    return [instr for instr in instrs if should_keep(instr)]
+
+def used_locally(block, target_insn):
+    """
+    Check if the destination of this instruction is used locally LATER.
+
+    Args:
+        block: the block containing the instruction
+        insn: the instruction
+
+    Returns:
+        True if the destination is used locally, False otherwise
+    """
+    found = False
+    for i, curr_insn in enumerate(block.instrs):
+        if curr_insn == target_insn:
+            found = True
+        if found and "args" in curr_insn and target_insn["dest"] in curr_insn["args"]:
+            return True
+    return False
+
 def live_variable_analysis(cfg, entry_block):
     in_map : dict[str, set] = {} # a per-block live map (in)
     out_map : dict[str, set] = {} # a per-block live map (out)
@@ -120,21 +147,34 @@ def live_variable_analysis(cfg, entry_block):
         block = worklist.pop()
         log_file.write(f"Processing block {block.label}\n")
         successors = list(cfg.successors(block))
+        log_file.write(f"Successors labels: {[succ.label for succ in successors]}\n")
         block_out_map = union_live_sets([in_map.get(succ.label, set()) for succ in successors])
-        for i, insn in enumerate(block.instrs):
+        log_file.write(f"block_out_map: {block_out_map}\n")
+        if block.label not in out_map or out_map[block.label] != block_out_map:
+            out_map[block.label] = block_out_map
+            log_file.write(f"Updating out_map for block {block.label}\n")
+        log_file.write(f"out_map: {out_map}\n")
+        block_in_map = block_out_map.copy()
+        for i, insn in reversed(list(enumerate(block.instrs))):
             if "dest" in insn:
-                if insn["dest"] in block_out_map:
-                    block_out_map.remove(insn["dest"])
+                if insn["dest"] in block_in_map:
+                    block_in_map.remove(insn["dest"])
             for arg in insn.get("args", []):
-                if arg in in_map:
-                    block_out_map.add(arg)
-        if block.label not in in_map or in_map[block.label] != block_out_map:
-            in_map[block.label] = block_out_map
+                block_in_map.add(arg)
+        if block.label not in in_map or in_map[block.label] != block_in_map:
+            in_map[block.label] = block_in_map
+            log_file.write(f"Updating in_map for block {block.label}\n")
+            log_file.write(f"in_map: {in_map}\n")
             worklist.extend(cfg.predecessors(block))
-
-def print_live_map(live_map):
-    for block_label, live_set in live_map.items():
-        print(f"Block {block_label}: {live_set}")
+    
+    for block in cfg.nodes:
+        for i, insn in reversed(list(enumerate(block.instrs))):
+            if "dest" in insn and insn["dest"] not in out_map[block.label] and not used_locally(block, insn):
+                log_file.write(f"Marking {insn} as dead for block {block.label}\n")
+                block.instrs[i]["op"] = "nop"
+    
+    for block in cfg.nodes:
+        block.instrs = remove_nops(block.instrs)
 
 if __name__ == "__main__":
     log_file = open("log/dataflow.log", "w")
@@ -143,7 +183,6 @@ if __name__ == "__main__":
     for fn in prog["functions"]:
         log_file.write(f"--> Processing function {fn['name']} -->\n")
         program_cfg, entry_block = cfg.construct_cfg(fn["instrs"])
-        print(program_cfg)
         const_prop_and_fold(program_cfg, entry_block)
         live_variable_analysis(program_cfg, entry_block)
         fn["instrs"] = cfg.cfg_to_instrs(program_cfg)
