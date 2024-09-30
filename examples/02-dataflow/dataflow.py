@@ -99,7 +99,7 @@ def const_prop_and_fold(cfg, entry_block):
             worklist.extend(cfg.successors(block))
 
 if __name__ == "__main__":
-    log_file = open("log/df_const_prop.log", "w")
+    log_file = open("log/dataflow.log", "w")
     prog = json.load(sys.stdin)
     log_file.write(f"Processing {len(prog['functions'])} function(s)\n")
     for fn in prog["functions"]:
