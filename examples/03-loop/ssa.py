@@ -31,13 +31,13 @@ def get_dominators(cfg: nx.DiGraph, entry: cfg.BasicBlock):
     """
     Get all dominators of a given CFG.
     """
-    log_file.write("--- Getting dominators ---")
+    # log_file.write("--- Getting dominators ---")
     post_order = list(reversed(list(nx.dfs_postorder_nodes(cfg, source=entry))))
     all_nodes = set(cfg.nodes)
     dom = {v: all_nodes for v in cfg.nodes}
-    log_file.write(f"Initial dom:")
-    for block in dom:
-        log_file.write(f"{block.label}: {[b.label for b in dom[block]]}\n")
+    # log_file.write(f"Initial dom:")
+    # for block in dom:
+        # log_file.write(f"{block.label}: {[b.label for b in dom[block]]}\n")
     while True:
         changed = False
         for node in post_order:
@@ -49,8 +49,8 @@ def get_dominators(cfg: nx.DiGraph, entry: cfg.BasicBlock):
                 changed = True
         if not changed:
             break
-    for block in dom:
-        log_file.write(f"{block.label}: {[b.label for b in dom[block]]}\n")
+    # for block in dom:
+        # log_file.write(f"{block.label}: {[b.label for b in dom[block]]}\n")
     return dom
 
 def rev_dom(dom: dict[cfg.BasicBlock, set[cfg.BasicBlock]]):

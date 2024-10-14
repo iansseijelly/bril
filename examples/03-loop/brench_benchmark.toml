@@ -6,12 +6,17 @@ extract = 'total_dyn_inst: (\d+)'
 [runs.baseline]
 pipeline = [
   "bril2json",
+  "python3 ssa.py",
+  "python3 from_ssa.py",
   "brili -p {args}",
 ]
 
-[runs.df]
+[runs.licm]
 pipeline = [
   "bril2json",
-  "python3 dataflow.py",
+  "python3 ssa.py",
+  "python3 licm.py",
+  "python3 from_ssa.py",
+  "python3 remove_nops.py",
   "brili -p {args}",
 ]
