@@ -2,9 +2,9 @@
 
 CS 265, Chengyi Lux Zhang
 
-link: https://github.com/iansseijelly/bril/tree/main/examples/02-dataflow
+link: https://github.com/iansseijelly/bril/tree/main/examples/03-loop
 
-This directory contains a transformation pass for dataflow analysis of constant propagation & folding and liveliness analysis. 
+This directory contains a transformation pass for ssa construction and loop analysis. 
 
 ## CFG
 
