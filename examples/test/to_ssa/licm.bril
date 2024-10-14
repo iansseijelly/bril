@@ -1,0 +1,16 @@
+@main(a: int) {
+.while.preheader:
+  apple: int = const 3;
+  orange: int = const 5;
+.while.cond:
+  banana: int = add apple orange;
+  zero: int = const 0;
+  is_term: bool = eq a banana;
+  br is_term .while.finish .while.body;
+.while.body:
+  one: int = const 1;
+  a: int = sub a one;
+  jmp .while.cond;
+.while.finish:
+  print a;
+}
