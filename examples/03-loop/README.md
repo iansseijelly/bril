@@ -20,9 +20,9 @@ My LICM is rather simple. It identify loops via backedges and identifies all inv
 
 ## Evaluation
 
-[This link](https://docs.google.com/spreadsheets/d/12mtxG8ja89oiqFjuu4fZcAQnq3IsoyqKdS58JzMF3_s/edit?gid=776043870#gid=776043870) is the spreadsheet to the complete results of running brench. 
-
 Among all benchmarks, only `dead-branch` *(-98 dyn insn)* and `pythagorean_triple` *(-7503 dyn insns)* are effectively optimized by my LICM. (Notice that I am comparing `ssa->from_ssa` as the baseline with `ssa->licm->from_ssa` as the optimized version). I have added a remove_nop pass in the very end, because my licm will only mark instructions as nop and not actually remove them. 
+
+[This link](https://docs.google.com/spreadsheets/d/12mtxG8ja89oiqFjuu4fZcAQnq3IsoyqKdS58JzMF3_s/edit?gid=776043870#gid=776043870) is the spreadsheet to the complete results of running brench. 
 
 This is kind of expected, because I got stucked on loop normalization... And eventually, my LICM specifically looks for patterns like the one in `examples/test/to_ssa/licm.bril`.
 
