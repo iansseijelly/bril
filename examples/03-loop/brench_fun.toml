@@ -3,7 +3,7 @@ benchmarks = '../../benchmarks/*/*.bril'
 # how to extract the performance metric from stderr
 extract = 'total_dyn_inst: (\d+)'
 
-[runs.baseline]
+[runs.norm_first]
 pipeline = [
   "bril2json",
   "python3 loop_norm.py",
@@ -11,12 +11,10 @@ pipeline = [
   "brili -p {args}",
 ]
 
-[runs.licm]
+[runs.ssa_first]
 pipeline = [
   "bril2json",
-  "python3 loop_norm.py",
   "python3 ssa.py",
-  "python3 licm.py",
-  "python3 remove_nops.py",
+  "python3 loop_norm.py",
   "brili -p {args}",
 ]

@@ -12,24 +12,23 @@ def func_from_ssa(func):
         # Insert copies for each phi.
         for instr in block.instrs:
             if instr.get('op') == 'phi':
+                log_file.write(f"phi detected in block {block.label}: instr {instr}\n")
                 dest = instr['dest']
                 type = instr['type']
                 for i, label in enumerate(instr['labels']):
+                    log_file.write(f"label: {label}\n")
+                    log_file.write(f"var: {instr['args'][i]}\n")
                     var = instr['args'][i]
                     if var != "__undefined":
                         # find the block corresponding to the label
                         for p in program_cfg.nodes:
                             if p.label == label:
-                                # iterate and find the assign instruction
-                                for i, insn in enumerate(p.instrs):
-                                    if var in insn.get('dest', []):
-                                        p.instrs.insert(i+1, {
-                                            'op': 'id',
-                                            'type': type,
-                                            'args': [var],
-                                            'dest': dest,
-                                        })
-                                        break
+                                p.instrs.append({
+                                    'op': 'id',
+                                    'type': type,
+                                    'args': [var],
+                                    'dest': dest,
+                                })
 
         # Remove all phis.
         new_block = [i for i in block.instrs if i.get('op') != 'phi']
@@ -45,4 +44,5 @@ def from_ssa(bril):
 
 
 if __name__ == '__main__':
+    log_file = open('log/from_ssa.debug.txt', 'w')
     print(json.dumps(from_ssa(json.load(sys.stdin)), indent=2, sort_keys=True))

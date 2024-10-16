@@ -21,8 +21,13 @@ class Loop:
 # A->B, A dominated by B, then (A, B) is a backedge
 def find_backedges(cfg: nx.DiGraph, dom: dict[cfg.BasicBlock, set[cfg.BasicBlock]]):
     back_edges = []
+    log_file.write("--- CFG ---\n")
+    for edge in cfg.edges:
+        log_file.write(f"{edge[0].label} -> {edge[1].label}\n")
     for u in cfg.nodes:
+        log_file.write(f"--- {u.label} ---\n")
         for v in cfg.successors(u):
+            log_file.write(f"{v.label} is a successor of {u.label}\n")
             if v in dom[u]:
                 back_edges.append((u, v))
     log_file.write("Back edges:\n")
@@ -51,7 +56,13 @@ def find_natural_loops(cfg: nx.DiGraph, back_edge: tuple[cfg.BasicBlock, cfg.Bas
 
 # pre-header, header, latch, body
 def loop_norm(loop: Loop, cfg: nx.DiGraph):
-    pre_header = cfg.BasicBlock("pre_header")
+    pre_header = cfg.BasicBlock(f"{loop.header.label}.preheader")
+    pre_header.instrs = [{"label": f"{loop.header.label}.preheader"}]
+    # move all header edges to pre_header
+    for pred in cfg.predecessors(loop.header):
+        cfg.add_edge(pre_header, pred)
+        cfg.remove_edge(pred, loop.header)
+    cfg.add_edge(pre_header, loop.header)
 
 def find_all_natural_loops(cfg: nx.DiGraph, back_edges: list[tuple[cfg.BasicBlock, cfg.BasicBlock]]):
     loops = []
@@ -69,16 +80,26 @@ def build_loop_def_map(loop: Loop):
                 invariant_map.add(instr["dest"])
     return invariant_map
 
-def build_loop_invar_map(cfg: nx.DiGraph, loop: Loop, func):
-    log_file.write(f"Building invariant map for loop {loop.header.label}\n")
+def build_non_loop_invar_map(cfg: nx.DiGraph, loop: Loop, func):
+    """
+    Treat loop as a black box, what is invariant outside the loop?
+    """
     invariant_map = set(ssa.get_arg_names(func))
-    insertion_map = [] # list of tuple (block, instr)
-    for node in cfg.predecessors(loop.header):
+    worklist = list(cfg.nodes)
+    while worklist:
+        node = worklist.pop()
         if node not in loop.body:
-            log_file.write(f"Node {node.label} not in loop body\n")
             for instr in node.instrs:
                 if "dest" in instr:
                     invariant_map.add(instr["dest"])
+    log_file.write(f"Non-loop invariant map: {invariant_map}\n")
+    return invariant_map
+
+def build_loop_invar_map(cfg: nx.DiGraph, loop: Loop, func):
+    log_file.write(f"Building invariant map for loop {loop.header.label}\n")
+    insertion_map = [] # list of tuple (block, instr)
+    # build invariant map for defs outside the loop
+    invariant_map = build_non_loop_invar_map(cfg, loop, func)
     # recursively find invariant assignments
     if invariant_map:
         while True:
@@ -100,9 +121,12 @@ def build_loop_invar_map(cfg: nx.DiGraph, loop: Loop, func):
                             insertion_map.append((loop.pre_header, instr.copy()))
                             log_file.write(f"appenede {instr} to {loop.pre_header.label}\n")
                             instr["op"] = "nop"
+                        else:
+                            log_file.write(f"non-singular predecessor: {predecessors}\n")
                         changed = True
             if not changed:
                 break
+    log_file.write(f"Invariant map: {invariant_map}\n")
     return invariant_map, insertion_map
 
 # find all loop-invariant assignments
@@ -117,9 +141,9 @@ def insert_instructions(program_cfg, insertion_map):
         for target_block, instr in insertion_map:
             if block == target_block:
                 log_file.write(f"Inserting {instr} into {block.label}\n")
-                new_instrs = block.instrs
+                new_instrs = block.instrs[:-1]
                 new_instrs.append(instr)
-                # new_instrs.extend(block.instrs[1:])
+                new_instrs.append(block.instrs[-1])
                 block.instrs = new_instrs
                 log_file.write(f"New instructions: {block.instrs}\n")
 

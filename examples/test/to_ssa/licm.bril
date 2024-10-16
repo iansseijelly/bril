@@ -1,5 +1,4 @@
 @main(a: int) {
-.while.preheader:
   apple: int = const 3;
   orange: int = const 5;
 .while.cond:

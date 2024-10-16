@@ -6,12 +6,17 @@ extract = '(\d+)'
 [runs.baseline]
 pipeline = [
   "bril2json",
+  "python3 loop_norm.py",
+  "python3 ssa.py",
   "brili {args}",
 ]
 
-[runs.df]
+[runs.licm]
 pipeline = [
   "bril2json",
-  "python3 dataflow.py",
+  "python3 loop_norm.py",
+  "python3 ssa.py",
+  "python3 licm.py",
+  "python3 remove_nops.py",
   "brili {args}",
 ]
