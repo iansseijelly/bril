@@ -45,6 +45,6 @@ I run a brench comparison between with and without licm. The baseline is loop no
 
 ![brench licm results](./imgs/licm.png)
 
-Among all benchmarks, it does nothing to the majority of them (only 8/72 benchmarks are optimized). The `pythagorean_triple.bril` program benefits the most (6.47%), and four other benchmarks benefited more or less. 
+Among all benchmarks, it does nothing to the majority of them (only 8/72 benchmarks are optimized). The `pythagorean_triple.bril` program benefits the most (6.47%), and four other benchmarks benefited more. Additionally, 3 other benchmarks benefited very minorly. (~1%)
 
-TBH, this is a bit sad... Feels like this time the effort does not justify the benefit (comparing to the results in dataflow especially)
+TBH, feels like this time the effort does not justify the benefit (comparing to the results in dataflow especially)

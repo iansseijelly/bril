@@ -54,16 +54,6 @@ def find_natural_loops(cfg: nx.DiGraph, back_edge: tuple[cfg.BasicBlock, cfg.Bas
     log_file.write(f"{loop}\n")
     return loop
 
-# pre-header, header, latch, body
-def loop_norm(loop: Loop, cfg: nx.DiGraph):
-    pre_header = cfg.BasicBlock(f"{loop.header.label}.preheader")
-    pre_header.instrs = [{"label": f"{loop.header.label}.preheader"}]
-    # move all header edges to pre_header
-    for pred in cfg.predecessors(loop.header):
-        cfg.add_edge(pre_header, pred)
-        cfg.remove_edge(pred, loop.header)
-    cfg.add_edge(pre_header, loop.header)
-
 def find_all_natural_loops(cfg: nx.DiGraph, back_edges: list[tuple[cfg.BasicBlock, cfg.BasicBlock]]):
     loops = []
     for back_edge in back_edges:
