@@ -1,0 +1,22 @@
+@main {
+  # Allocate space for one integer
+  one: int = const 1;
+  x: ptr<int> = alloc one;
+  x2: ptr<int> = alloc one;
+
+  value_a: int = const 42;
+  value_b: int = const 100;
+
+  # Two consecutive stores to x, the first is dead
+  store x value_a;
+  useless: int = load x2;
+  store x value_b;  # This store overwrites the previous one
+
+  # Load the final value of x to confirm elimination
+  y: int = load x;
+  print y;
+
+  # Free allocated memory
+  free x;
+  ret;
+}
