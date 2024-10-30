@@ -1,0 +1,20 @@
+# which benchmarks to run
+benchmarks = '../test/mem/*.bril'
+# how to extract the performance metric from stderr
+extract = 'total_dyn_inst: (\d+)'
+
+[runs.base]
+pipeline = [
+  "bril2json",
+  "python3 ssa.py",
+  "brili -p {args}",
+]
+
+[runs.memo]
+pipeline = [
+  "bril2json",
+  "python3 ssa.py",
+  "python3 mem.py",
+  "python3 remove_nops.py",
+  "brili -p {args}",
+]

@@ -13,7 +13,7 @@ def union_pointer_sets(pointer_sets):
     """
     # remove all None values
     pointer_sets = [ps for ps in pointer_sets if ps is not None]
-    return set(pointer_sets)
+    return set().union(*pointer_sets)
 
 def intersect_pointer_maps(pred_pointer_maps):
     # gather all possible keys
@@ -34,15 +34,18 @@ def mark_use(use_map, argument, block_pointer_map):
     if "any" in pointer:
         # mark all use as True
         for use in use_map.values():
-            use[1] = True
+            use = (use[0], True)
         # check for aliasing
     for store_dest in use_map.keys():
-        if pointer.intersection(block_pointer_map[store_dest]):
+        if pointer.intersection(block_pointer_map.get(store_dest, set())):
             use_map[store_dest] = (use_map[store_dest][0], True) # hack to modify tuple
 
 
 def mem_analysis(cfg, entry_block, arg_names):
     pointer_map : dict[str, dict[str, set[str]]] = {} # a per-block pointer map
+    # init all pointer maps to empty
+    for block in cfg.nodes:
+        pointer_map[block.label] = {}
     # initialize the pointer map for function entry
     pointer_map[entry_block.label] = {arg: {"any"} for arg in arg_names}
     post_order = list(list(nx.dfs_postorder_nodes(cfg, source=entry_block)))
@@ -70,7 +73,7 @@ def mem_analysis(cfg, entry_block, arg_names):
                         log_file.write(f"Prev store for {store_dest_ptr}: {prev_store_insn}\n")
                         if not used:
                             prev_store_insn["op"] = "nop"
-                            log_file.write(f"Marking {instr['args'][0]} as unused\n")
+                            log_file.write(f"Marking {instr['args'][0]} as unused NOP!\n")
                         store_use_map[store_dest_ptr] = (instr, False)
                         log_file.write(f"Marking most recent store for {store_dest_ptr} as {instr}\n")
                     case _:

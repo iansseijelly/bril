@@ -9,6 +9,7 @@
 
   # Two consecutive stores to x, the first is dead
   store x value_a;
+  store x2 value_b;
   useless: int = load x2;
   store x value_b;  # This store overwrites the previous one
 
@@ -18,5 +19,6 @@
 
   # Free allocated memory
   free x;
+  free x2;
   ret;
 }
